@@ -98,19 +98,16 @@ jobs:
           popd
         shell: bash
 
-      - name: Pushing new release
-        uses: ncipollo/release-action@v1
-        with:
-          name: ${{ steps.version_info.outputs.build_version }}
-          artifacts: "release_output/*.tar.gz,release_output/*.zip"
-          tag: ${{ steps.version_info.outputs.build_version }}
-          body: "For more informations about this release please check out the official [Changelog](https://github.com/Ryujinx/Ryujinx/wiki/Changelog)."
-          allowUpdates: true
-          removeArtifacts: true
-          replacesArtifacts: true
-          owner: ${{ env.RYUJINX_TARGET_RELEASE_CHANNEL_OWNER }}
-          repo: ${{ env.RYUJINX_TARGET_RELEASE_CHANNEL_REPO }}
-          token: ${{ secrets.RELEASE_TOKEN }}
+      - name: Update Tag
+        uses: actions/github-script@v5
+          with:
+            script: |
+              github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/tags/${{ steps.version_info.outputs.build_version }}',
+                sha: context.sha
+              })
 
   flatpak_release:
     uses: ./.github/workflows/flatpak.yml
